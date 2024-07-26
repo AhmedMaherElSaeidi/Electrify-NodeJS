@@ -37,7 +37,7 @@ router.post("/", async (req, res) => {
   const { error } = schema.validate(category);
   if (error) return res.status(400).json({ message: error.details[0].message });
 
-  // Saving product
+  // Saving category
   category = await ProductCategory.create(category);
   res.status(201).json({ data: category });
 });

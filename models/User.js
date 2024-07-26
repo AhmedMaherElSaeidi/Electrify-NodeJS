@@ -26,6 +26,10 @@ module.exports = (db, type) => {
       type: type.STRING,
       allowNull: false,
     },
+    telephone: {
+      type: type.STRING,
+      allowNull: false,
+    },
     gender: {
       type: type.ENUM("M", "F"),
       allowNull: false,

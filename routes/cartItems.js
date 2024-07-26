@@ -75,7 +75,7 @@ router.put("/:id", async (req, res) => {
     return res.status(201).json({ message: "Updated successfully." });
   }
 
-  res.status(404).json({ message: "Product with given ID wasn't found" });
+  res.status(404).json({ message: "CatItem with given ID wasn't found" });
 });
 
 router.delete("/:id", async (req, res) => {
@@ -84,12 +84,12 @@ router.delete("/:id", async (req, res) => {
   });
 
   if (cartItem) {
-    // Removing cart
+    // Removing cartItem
     await CatItem.destroy({ where: { id: req.params.id } });
     return res.status(200).json({ message: "Deleted successfully." });
   }
 
-  res.status(404).json({ message: "Cart with given ID wasn't found" });
+  res.status(404).json({ message: "CatItem with given ID wasn't found" });
 });
 
 module.exports = router;
