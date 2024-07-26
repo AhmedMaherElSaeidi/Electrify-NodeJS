@@ -1,0 +1,8 @@
+# Ignore all
+public/*
+node_modules
+
+# Negate the ignore rule for the specific files
+!public/default-product-image.jpg
+!public/default-male-avatar-profile.jpg
+!public/default-female-avatar-profiler.jpg
