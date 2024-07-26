@@ -35,6 +35,7 @@ router.get("/:id", async (req, res) => {
     where: { id: req.params.id },
     ...query,
   });
+  
   product
     ? res.status(201).json({ data: product })
     : res.status(404).json({ message: "Product with given ID wasn't found" });
@@ -51,7 +52,7 @@ router.post("/", async (req, res) => {
   product.image = product.image ? product.image : "default-product-image.jpg";
 
   // Saving product
-  product = await Product.create({ data: product });
+  product = await Product.create(product);
   res.status(201).json({ data: product });
 });
 

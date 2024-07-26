@@ -13,9 +13,11 @@ if (app.get("env") === "development") app.use(morgan("tiny"));
 // Importing routes (APIs)
 const default_routes = require("./routes/default");
 const products_routes = require("./routes/products");
+const categories_routes = require("./routes/categories");
 
 app.use("/", default_routes);
 app.use("/api/products", products_routes);
+app.use("/api/categories", categories_routes);
 
 // Server listening
 const PORT = process.env.PORT || 3000;
