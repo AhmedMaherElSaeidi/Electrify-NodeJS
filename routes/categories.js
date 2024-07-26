@@ -16,7 +16,6 @@ const query = {
 // CRUD operations
 router.get("/", async (req, res) => {
   const categories = await ProductCategory.findAll(query);
-
   res.status(201).json({ data: categories });
 });
 
@@ -56,7 +55,7 @@ router.put("/:id", async (req, res) => {
     if (error)
       return res.status(400).json({ message: error.details[0].message });
 
-    // Updating product
+    // Updating ProductCategory
     await ProductCategory.update(category, {
       where: {
         id: req.params.id,
