@@ -6,8 +6,8 @@ const { Cart, CatItem, Product } = require("../models/index");
 // Table schema (for validating post, and put request)
 const schema = Joi.object({
   location: Joi.string().required(),
-  status: Joi.string().required(),
   user_id: Joi.number().positive().required(),
+  status: Joi.string().valid("pending", "delivered", "canceled").required(),
 });
 const query = {
   include: [

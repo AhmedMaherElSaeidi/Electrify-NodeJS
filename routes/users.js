@@ -10,8 +10,8 @@ const schema = Joi.object({
   username: Joi.string().min(5).max(30).required(),
   password: Joi.string().required(),
   telephone: Joi.string().min(11).max(11).required(),
-  gender: Joi.string().required(),
-  role: Joi.string().required(),
+  gender: Joi.string().valid("M", "F").required(),
+  role: Joi.string().valid("admin", "customer").required(),
 });
 const query = {
   attributes: {
