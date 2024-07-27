@@ -36,14 +36,18 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-  const product = await Product.findOne({
-    where: { id: req.params.id },
-    ...query,
-  });
+  try {
+    const product = await Product.findOne({
+      where: { id: req.params.id },
+      ...query,
+    });
 
-  product
-    ? res.status(201).json({ data: product })
-    : res.status(404).json({ message: "Product with given ID wasn't found" });
+    product
+      ? res.status(201).json({ data: product })
+      : res.status(404).json({ message: "Product with given ID wasn't found" });
+  } catch (error) {
+    res.status(400).json({ message: error });
+  }
 });
 
 router.post(
@@ -52,33 +56,7 @@ router.post(
   authorizedAdmin,
   upload.single("image"),
   async (req, res) => {
-    let product = req.body;
-
-    // Validate data
-    const { error } = schema.validate(product);
-    if (error)
-      return res.status(400).json({ message: error.details[0].message });
-
-    // Set product image
-    product.image = req.file ? req.file.filename : "default-product-image.jpg";
-
-    // Saving product
-    product = await Product.create(product);
-    res.status(201).json({ data: product });
-  }
-);
-
-router.put(
-  "/:id",
-  authorized,
-  authorizedAdmin,
-  upload.single("image"),
-  async (req, res) => {
-    let product = await Product.findOne({
-      where: { id: req.params.id },
-    });
-
-    if (product) {
+    try {
       let product = req.body;
 
       // Validate data
@@ -91,40 +69,80 @@ router.put(
         ? req.file.filename
         : "default-product-image.jpg";
 
-      // Updating product
-      await Product.update(product, {
-        where: {
-          id: req.params.id,
-        },
-      });
-      return res.status(201).json({ message: "Updated successfully." });
+      // Saving product
+      product = await Product.create(product);
+      res.status(201).json({ data: product });
+    } catch (error) {
+      res.status(400).json({ message: error });
     }
+  }
+);
 
-    res.status(404).json({ message: "Product with given ID wasn't found" });
+router.put(
+  "/:id",
+  authorized,
+  authorizedAdmin,
+  upload.single("image"),
+  async (req, res) => {
+    try {
+      let product = await Product.findOne({
+        where: { id: req.params.id },
+      });
+
+      if (product) {
+        let product = req.body;
+
+        // Validate data
+        const { error } = schema.validate(product);
+        if (error)
+          return res.status(400).json({ message: error.details[0].message });
+
+        // Set product image
+        product.image = req.file
+          ? req.file.filename
+          : "default-product-image.jpg";
+
+        // Updating product
+        await Product.update(product, {
+          where: {
+            id: req.params.id,
+          },
+        });
+        return res.status(201).json({ message: "Updated successfully." });
+      }
+
+      res.status(404).json({ message: "Product with given ID wasn't found" });
+    } catch (error) {
+      res.status(400).json({ message: error });
+    }
   }
 );
 
 router.delete("/:id", authorized, authorizedAdmin, async (req, res) => {
-  const product = await Product.findOne({
-    where: { id: req.params.id },
-  });
+  try {
+    const product = await Product.findOne({
+      where: { id: req.params.id },
+    });
 
-  if (product) {
-    // Removing product image
-    if (product.image !== "default-product-image.jpg") {
-      const deleted = await File.deleteFile(`../public/${product.image}`);
-      if (!deleted)
-        return res
-          .status(400)
-          .json({ message: "Error encountered while removing image." });
+    if (product) {
+      // Removing product image
+      if (product.image !== "default-product-image.jpg") {
+        const deleted = await File.deleteFile(`../public/${product.image}`);
+        if (!deleted)
+          return res
+            .status(400)
+            .json({ message: "Error encountered while removing image." });
+      }
+
+      // Removing product
+      await Product.destroy({ where: { id: req.params.id } });
+      return res.status(200).json({ message: "Deleted successfully." });
     }
 
-    // Removing product
-    await Product.destroy({ where: { id: req.params.id } });
-    return res.status(200).json({ message: "Deleted successfully." });
+    res.status(404).json({ message: "Product with given ID wasn't found" });
+  } catch (error) {
+    res.status(400).json({ message: error });
   }
-
-  res.status(404).json({ message: "Product with given ID wasn't found" });
 });
 
 module.exports = router;
