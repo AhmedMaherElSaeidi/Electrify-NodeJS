@@ -3,6 +3,7 @@ const router = express.Router();
 const Joi = require("joi");
 const { Op } = require("sequelize");
 const { User } = require("../models/index");
+const JWT = require("../services/JWT");
 const Password = require("../services/Password");
 
 // Table schema (for validating post, and put request)
@@ -10,7 +11,7 @@ const schema = {
   fname: Joi.string().min(3).max(20).required(),
   lname: Joi.string().min(3).max(20).required(),
   username: Joi.string().min(5).max(30).required(),
-  password: Joi.string().required(),
+  password: Joi.string().min(8).max(30).required(),
   telephone: Joi.string().min(11).max(11).required(),
   gender: Joi.string().valid("M", "F").required(),
 };
@@ -70,6 +71,17 @@ router.post("/", async (req, res) => {
 
     // Saving user
     user = await User.create(user);
+    const token = JWT.sign({
+      id: user.id,
+      name: `${user.fname} ${user.lname}`,
+      username: user.username,
+      telephone: user.telephone,
+      image: user.image,
+      gender: user.gender,
+      admin: user.role === "admin" ? true : false,
+    });
+
+    res.header("x-auth-token", token);
     res.status(201).json({ data: user });
   } catch (error) {
     res.status(400).json({ message: error });
