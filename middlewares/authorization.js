@@ -17,23 +17,11 @@ const authorized = (req, res, next) => {
 };
 
 const authorizedAdmin = (req, res, next) => {
-  try {
-    const token = req.header("x-auth-token");
-    if (!token)
-      return res
-        .status(401)
-        .json({ message: "Access Denied, No token provided." });
+  const isAdmin = req.user.admin;
+  if (!isAdmin)
+    return res.status(403).json({ message: "Unauthorized access." });
 
-    const jwt = new JWT();
-    const user = jwt.verifyAuthToken(token);
-    if (!user.admin)
-      return res.status(403).json({ message: "Unauthorized access." });
-
-    req.user = user;
-    next();
-  } catch (error) {
-    res.status(400).json({ message: "INVALID TOKEN." });
-  }
+  next();
 };
 
 module.exports = { authorized, authorizedAdmin };

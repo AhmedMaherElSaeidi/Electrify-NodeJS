@@ -6,6 +6,7 @@ const { Op } = require("sequelize");
 const { User } = require("../models/index");
 const JWT = require("../services/JWT");
 const Password = require("../services/Password");
+const File = require("../services/File");
 
 // Table schema (for validating post, and put request)
 const schema = {
@@ -15,6 +16,7 @@ const schema = {
   password: Joi.string().min(8).max(30).required(),
   telephone: Joi.string().min(11).max(11).required(),
   gender: Joi.string().valid("M", "F").required(),
+  image: Joi.string(),
 };
 const post_schema = Joi.object(schema);
 const put_schema = Joi.object({ ...schema, password: Joi.string() });
@@ -24,19 +26,20 @@ const query = {
   },
 };
 
-const userProfile = (gender) => {
+const upload = File.uploadFile();
+const defaultUserProfile = (gender) => {
   return gender === "M"
     ? "default-male-avatar-profile.jpg"
     : "default-female-avatar-profiler.jpg";
 };
 
 // CRUD operations
-router.get("/", authorizedAdmin, async (req, res) => {
+router.get("/", authorized, authorizedAdmin, async (req, res) => {
   const users = await User.findAll(query);
   res.status(201).json({ data: users });
 });
 
-router.get("/:id", authorizedAdmin, async (req, res) => {
+router.get("/:id", authorized, authorizedAdmin, async (req, res) => {
   try {
     const user = await User.findOne({
       where: { id: req.params.id },
@@ -51,7 +54,7 @@ router.get("/:id", authorizedAdmin, async (req, res) => {
   }
 });
 
-router.post("/", async (req, res) => {
+router.post("/", upload.single("image"), async (req, res) => {
   try {
     let user = req.body;
 
@@ -68,7 +71,7 @@ router.post("/", async (req, res) => {
     // Set user attributes
     user.role = user.role ? user.role : "customer";
     user.password = await Password.hashPassword(user.password);
-    user.image = user.image ? user.image : userProfile(user.gender);
+    user.image = req.file ? req.file.filename : defaultUserProfile(user.gender);
 
     // Saving user
     user = await User.create(user);
@@ -81,7 +84,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", authorized, async (req, res) => {
+router.put("/:id", authorized, upload.single("image"), async (req, res) => {
   try {
     let oldUser = await User.findOne({
       where: { id: req.params.id },
@@ -108,7 +111,9 @@ router.put("/:id", authorized, async (req, res) => {
         return res.status(400).json({ message: "Username already exists.!" });
 
       // Set user attributes
-      user.image = user.image ? user.image : userProfile(user.gender);
+      user.image = req.file
+        ? req.file.filename
+        : defaultUserProfile(user.gender);
       user.password = user.password
         ? await Password.hashPassword(user.password)
         : delete user.password;
@@ -129,7 +134,7 @@ router.put("/:id", authorized, async (req, res) => {
   }
 });
 
-router.delete("/:id", authorizedAdmin, async (req, res) => {
+router.delete("/:id", authorized, authorizedAdmin, async (req, res) => {
   try {
     const user = await User.findOne({
       where: { id: req.params.id },
@@ -137,9 +142,12 @@ router.delete("/:id", authorizedAdmin, async (req, res) => {
 
     if (user) {
       // Removing product image
-      if (!user.image.includes("avatar-profile.jpg")) {
-        // do sth..
-        console.log("im here");
+      if (!user.image.includes("avatar-profiler.jpg")) {
+        const deleted = await File.deleteFile(`../public/${user.image}`);
+        if (!deleted)
+          return res
+            .status(400)
+            .json({ message: "Error encountered while removing image." });
       }
 
       // Removing user
