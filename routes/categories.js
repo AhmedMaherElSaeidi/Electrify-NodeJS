@@ -21,34 +21,24 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-  const category = await ProductCategory.findOne({
-    where: { id: req.params.id },
-    ...query,
-  });
+  try {
+    const category = await ProductCategory.findOne({
+      where: { id: req.params.id },
+      ...query,
+    });
 
-  category
-    ? res.status(201).json({ data: category })
-    : res.status(404).json({ message: "Category with given ID wasn't found" });
+    category
+      ? res.status(201).json({ data: category })
+      : res
+          .status(404)
+          .json({ message: "Category with given ID wasn't found" });
+  } catch (error) {
+    res.status(400).json({ message: error });
+  }
 });
 
 router.post("/", authorized, authorizedAdmin, async (req, res) => {
-  let category = req.body;
-
-  // Validate data
-  const { error } = schema.validate(category);
-  if (error) return res.status(400).json({ message: error.details[0].message });
-
-  // Saving category
-  category = await ProductCategory.create(category);
-  res.status(201).json({ data: category });
-});
-
-router.put("/:id", authorized, authorizedAdmin, async (req, res) => {
-  let category = await ProductCategory.findOne({
-    where: { id: req.params.id },
-  });
-
-  if (category) {
+  try {
     let category = req.body;
 
     // Validate data
@@ -56,30 +46,59 @@ router.put("/:id", authorized, authorizedAdmin, async (req, res) => {
     if (error)
       return res.status(400).json({ message: error.details[0].message });
 
-    // Updating ProductCategory
-    await ProductCategory.update(category, {
-      where: {
-        id: req.params.id,
-      },
-    });
-    return res.status(201).json({ message: "Updated successfully." });
+    // Saving category
+    category = await ProductCategory.create(category);
+    res.status(201).json({ data: category });
+  } catch (error) {
+    res.status(400).json({ message: error });
   }
+});
 
-  res.status(404).json({ message: "Category with given ID wasn't found" });
+router.put("/:id", authorized, authorizedAdmin, async (req, res) => {
+  try {
+    let category = await ProductCategory.findOne({
+      where: { id: req.params.id },
+    });
+
+    if (category) {
+      let category = req.body;
+
+      // Validate data
+      const { error } = schema.validate(category);
+      if (error)
+        return res.status(400).json({ message: error.details[0].message });
+
+      // Updating ProductCategory
+      await ProductCategory.update(category, {
+        where: {
+          id: req.params.id,
+        },
+      });
+      return res.status(201).json({ message: "Updated successfully." });
+    }
+
+    res.status(404).json({ message: "Category with given ID wasn't found" });
+  } catch (error) {
+    res.status(400).json({ message: error });
+  }
 });
 
 router.delete("/:id", authorized, authorizedAdmin, async (req, res) => {
-  const category = await ProductCategory.findOne({
-    where: { id: req.params.id },
-  });
+  try {
+    const category = await ProductCategory.findOne({
+      where: { id: req.params.id },
+    });
 
-  if (category) {
-    // Removing category
-    await ProductCategory.destroy({ where: { id: req.params.id } });
-    return res.status(200).json({ message: "Deleted successfully." });
+    if (category) {
+      // Removing category
+      await ProductCategory.destroy({ where: { id: req.params.id } });
+      return res.status(200).json({ message: "Deleted successfully." });
+    }
+
+    res.status(404).json({ message: "Category with given ID wasn't found" });
+  } catch (error) {
+    res.status(400).json({ message: error });
   }
-
-  res.status(404).json({ message: "Category with given ID wasn't found" });
 });
 
 module.exports = router;
