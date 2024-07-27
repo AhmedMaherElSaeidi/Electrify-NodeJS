@@ -40,34 +40,22 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/:id", async (req, res) => {
-  const cart = await Cart.findOne({
-    where: { id: req.params.id },
-    ...query,
-  });
+  try {
+    const cart = await Cart.findOne({
+      where: { id: req.params.id },
+      ...query,
+    });
 
-  cart
-    ? res.status(201).json({ data: cart })
-    : res.status(404).json({ message: "Cart with given ID wasn't found" });
+    cart
+      ? res.status(201).json({ data: cart })
+      : res.status(404).json({ message: "Cart with given ID wasn't found" });
+  } catch (error) {
+    res.status(400).json({ message: error });
+  }
 });
 
 router.post("/", async (req, res) => {
-  let cart = req.body;
-
-  // Validate data
-  const { error } = schema.validate(cart);
-  if (error) return res.status(400).json({ message: error.details[0].message });
-
-  // Saving cart
-  cart = await Cart.create(cart);
-  res.status(201).json({ data: cart });
-});
-
-router.put("/:id", async (req, res) => {
-  let cart = await Cart.findOne({
-    where: { id: req.params.id },
-  });
-
-  if (cart) {
+  try {
     let cart = req.body;
 
     // Validate data
@@ -75,30 +63,59 @@ router.put("/:id", async (req, res) => {
     if (error)
       return res.status(400).json({ message: error.details[0].message });
 
-    // Updating cart
-    await Cart.update(cart, {
-      where: {
-        id: req.params.id,
-      },
-    });
-    return res.status(201).json({ message: "Updated successfully." });
+    // Saving cart
+    cart = await Cart.create(cart);
+    res.status(201).json({ data: cart });
+  } catch (error) {
+    res.status(400).json({ message: error });
   }
+});
 
-  res.status(404).json({ message: "Cart with given ID wasn't found" });
+router.put("/:id", async (req, res) => {
+  try {
+    let cart = await Cart.findOne({
+      where: { id: req.params.id },
+    });
+
+    if (cart) {
+      let cart = req.body;
+
+      // Validate data
+      const { error } = schema.validate(cart);
+      if (error)
+        return res.status(400).json({ message: error.details[0].message });
+
+      // Updating cart
+      await Cart.update(cart, {
+        where: {
+          id: req.params.id,
+        },
+      });
+      return res.status(201).json({ message: "Updated successfully." });
+    }
+
+    res.status(404).json({ message: "Cart with given ID wasn't found" });
+  } catch (error) {
+    res.status(400).json({ message: error });
+  }
 });
 
 router.delete("/:id", async (req, res) => {
-  const cart = await Cart.findOne({
-    where: { id: req.params.id },
-  });
+  try {
+    const cart = await Cart.findOne({
+      where: { id: req.params.id },
+    });
 
-  if (cart) {
-    // Removing cart
-    await Cart.destroy({ where: { id: req.params.id } });
-    return res.status(200).json({ message: "Deleted successfully." });
+    if (cart) {
+      // Removing cart
+      await Cart.destroy({ where: { id: req.params.id } });
+      return res.status(200).json({ message: "Deleted successfully." });
+    }
+
+    res.status(404).json({ message: "Cart with given ID wasn't found" });
+  } catch (error) {
+    res.status(400).json({ message: error });
   }
-
-  res.status(404).json({ message: "Cart with given ID wasn't found" });
 });
 
 module.exports = router;
