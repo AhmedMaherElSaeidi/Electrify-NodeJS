@@ -1,14 +1,24 @@
 const jwt = require("jsonwebtoken");
 
 class JWT {
-  static _key = "5BD24DCB1483578373DD86A7AD35F";
-  static _ms = "3600s";
+  #key = "5BD24DCB1483578373DD86A7AD35F";
+  #ms = "3600s";
 
-  static sign(object) {
-    return jwt.sign(object, this._key, { expiresIn: this._ms });
+  getAuthToken(user) {
+    const payload = {
+      id: user.id,
+      name: `${user.fname} ${user.lname}`,
+      username: user.username,
+      telephone: user.telephone,
+      image: user.image,
+      gender: user.gender,
+      admin: user.role === "admin" ? true : false,
+    };
+
+    return jwt.sign(payload, this.#key, { expiresIn: this.#ms });
   }
 
-  static verify(token) {}
+  verifyAuthToken(token) {}
 }
 
 module.exports = JWT;

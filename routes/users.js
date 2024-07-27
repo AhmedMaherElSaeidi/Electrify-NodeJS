@@ -71,17 +71,9 @@ router.post("/", async (req, res) => {
 
     // Saving user
     user = await User.create(user);
-    const token = JWT.sign({
-      id: user.id,
-      name: `${user.fname} ${user.lname}`,
-      username: user.username,
-      telephone: user.telephone,
-      image: user.image,
-      gender: user.gender,
-      admin: user.role === "admin" ? true : false,
-    });
+    const jwt = new JWT();
 
-    res.header("x-auth-token", token);
+    res.header("x-auth-token", jwt.getAuthToken(user));
     res.status(201).json({ data: user });
   } catch (error) {
     res.status(400).json({ message: error });
