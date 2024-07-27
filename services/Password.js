@@ -8,7 +8,9 @@ class Password {
     return await bcrypt.hash(password, salt);
   }
 
-  static comparePassword(password, hashedPassword) {}
+  static async comparePassword(password, hashedPassword) {
+    return await bcrypt.compare(password, hashedPassword);
+  }
 }
 
 module.exports = Password;
