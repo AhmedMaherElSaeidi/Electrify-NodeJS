@@ -56,8 +56,6 @@ db.sync({ force: false }).then(async () => {
       { name: "Cooling and Heating" },
     ]);
   }
-
-  console.log("Tables Created!");
 });
 
 // export tables
