@@ -1,3 +1,4 @@
+const { authorizedAdmin } = require("../middlewares/authorization");
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
@@ -30,7 +31,7 @@ router.get("/:id", async (req, res) => {
     : res.status(404).json({ message: "Category with given ID wasn't found" });
 });
 
-router.post("/", async (req, res) => {
+router.post("/", authorizedAdmin, async (req, res) => {
   let category = req.body;
 
   // Validate data
@@ -42,7 +43,7 @@ router.post("/", async (req, res) => {
   res.status(201).json({ data: category });
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authorizedAdmin, async (req, res) => {
   let category = await ProductCategory.findOne({
     where: { id: req.params.id },
   });
@@ -67,7 +68,7 @@ router.put("/:id", async (req, res) => {
   res.status(404).json({ message: "Category with given ID wasn't found" });
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authorizedAdmin, async (req, res) => {
   const category = await ProductCategory.findOne({
     where: { id: req.params.id },
   });

@@ -1,3 +1,4 @@
+const { authorized, authorizedAdmin } = require("../middlewares/authorization");
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
@@ -30,12 +31,12 @@ const userProfile = (gender) => {
 };
 
 // CRUD operations
-router.get("/", async (req, res) => {
+router.get("/", authorizedAdmin, async (req, res) => {
   const users = await User.findAll(query);
   res.status(201).json({ data: users });
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id", authorizedAdmin, async (req, res) => {
   try {
     const user = await User.findOne({
       where: { id: req.params.id },
@@ -80,7 +81,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authorized, async (req, res) => {
   try {
     let oldUser = await User.findOne({
       where: { id: req.params.id },
@@ -128,7 +129,7 @@ router.put("/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authorizedAdmin, async (req, res) => {
   try {
     const user = await User.findOne({
       where: { id: req.params.id },

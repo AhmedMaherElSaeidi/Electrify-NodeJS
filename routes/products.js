@@ -1,3 +1,4 @@
+const { authorizedAdmin } = require("../middlewares/authorization");
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
@@ -41,7 +42,7 @@ router.get("/:id", async (req, res) => {
     : res.status(404).json({ message: "Product with given ID wasn't found" });
 });
 
-router.post("/", async (req, res) => {
+router.post("/", authorizedAdmin, async (req, res) => {
   let product = req.body;
 
   // Validate data
@@ -56,7 +57,7 @@ router.post("/", async (req, res) => {
   res.status(201).json({ data: product });
 });
 
-router.put("/:id", async (req, res) => {
+router.put("/:id", authorizedAdmin, async (req, res) => {
   let product = await Product.findOne({
     where: { id: req.params.id },
   });
@@ -84,7 +85,7 @@ router.put("/:id", async (req, res) => {
   res.status(404).json({ message: "Product with given ID wasn't found" });
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", authorizedAdmin, async (req, res) => {
   const product = await Product.findOne({
     where: { id: req.params.id },
   });

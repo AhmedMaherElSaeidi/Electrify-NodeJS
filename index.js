@@ -1,3 +1,4 @@
+const { authorized } = require("./middlewares/authorization");
 const cors = require("cors");
 const morgan = require("morgan");
 const express = require("express");
@@ -22,9 +23,9 @@ const categories_routes = require("./routes/categories");
 app.use("/", default_routes);
 app.use("/api/auth", auth_routes);
 app.use("/api/users", user_routes);
-app.use("/api/carts", carts_routes);
+app.use("/api/carts", authorized, carts_routes);
 app.use("/api/products", products_routes);
-app.use("/api/cartItems", cartItems_routes);
+app.use("/api/cartItems", authorized, cartItems_routes);
 app.use("/api/categories", categories_routes);
 
 // Server listening
