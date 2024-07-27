@@ -1,21 +1,24 @@
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
+const { Op } = require("sequelize");
 const { User } = require("../models/index");
+const Password = require("../services/Password");
 
 // Table schema (for validating post, and put request)
-const schema = Joi.object({
+const schema = {
   fname: Joi.string().min(3).max(20).required(),
   lname: Joi.string().min(3).max(20).required(),
   username: Joi.string().min(5).max(30).required(),
   password: Joi.string().required(),
   telephone: Joi.string().min(11).max(11).required(),
   gender: Joi.string().valid("M", "F").required(),
-  role: Joi.string().valid("admin", "customer").required(),
-});
+};
+const post_schema = Joi.object(schema);
+const put_schema = Joi.object({ ...schema, password: Joi.string() });
 const query = {
   attributes: {
-    exclude: ["createdAt", "updatedAt"],
+    exclude: ["password", "createdAt", "updatedAt"],
   },
 };
 
@@ -42,7 +45,7 @@ router.get("/:id", async (req, res) => {
       ? res.status(201).json({ data: user })
       : res.status(404).json({ message: "User with given ID wasn't found" });
   } catch (error) {
-    res.status(500).json({ message: error });
+    res.status(400).json({ message: error });
   }
 });
 
@@ -51,39 +54,62 @@ router.post("/", async (req, res) => {
     let user = req.body;
 
     // Validate data
-    const { error } = schema.validate(user);
+    const { error } = post_schema.validate(user);
     if (error)
       return res.status(400).json({ message: error.details[0].message });
 
-    // Set user image
+    // Validating for existing username
+    const _user = await User.findOne({ where: { username: user.username } });
+    if (_user)
+      return res.status(400).json({ message: "Username already exists.!" });
+
+    // Set user attributes
+    user.role = user.role ? user.role : "customer";
+    user.password = await Password.hashPassword(user.password);
     user.image = user.image ? user.image : userProfile(user.gender);
 
     // Saving user
     user = await User.create(user);
     res.status(201).json({ data: user });
   } catch (error) {
-    res.status(500).json({ message: error });
+    res.status(400).json({ message: error });
   }
 });
 
 router.put("/:id", async (req, res) => {
   try {
-    let user = await User.findOne({
+    let oldUser = await User.findOne({
       where: { id: req.params.id },
     });
 
-    if (user) {
+    if (oldUser) {
       let user = req.body;
 
       // Validate data
-      const { error } = schema.validate(user);
+      const { error } = put_schema.validate(user);
       if (error)
         return res.status(400).json({ message: error.details[0].message });
 
-      // Set user image
+      // Validating for existing username
+      const _existing_username = await await User.findOne({
+        where: {
+          username: user.username,
+          id: {
+            [Op.ne]: req.params.id,
+          },
+        },
+      });
+      if (_existing_username)
+        return res.status(400).json({ message: "Username already exists.!" });
+
+      // Set user attributes
       user.image = user.image ? user.image : userProfile(user.gender);
+      user.password = user.password
+        ? await Password.hashPassword(user.password)
+        : delete user.password;
 
       // Updating user
+      if (oldUser.user === user.username) delete user.username;
       await User.update(user, {
         where: {
           id: req.params.id,
@@ -94,7 +120,7 @@ router.put("/:id", async (req, res) => {
 
     res.status(404).json({ message: "User with given ID wasn't found" });
   } catch (error) {
-    res.status(500).json({ message: error });
+    res.status(400).json({ message: error });
   }
 });
 
@@ -118,7 +144,7 @@ router.delete("/:id", async (req, res) => {
 
     res.status(404).json({ message: "User with given ID wasn't found" });
   } catch (error) {
-    res.status(500).json({ message: error });
+    res.status(400).json({ message: error });
   }
 });
 
