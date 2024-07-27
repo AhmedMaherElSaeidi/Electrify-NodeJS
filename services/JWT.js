@@ -18,7 +18,9 @@ class JWT {
     return jwt.sign(payload, this.#key, { expiresIn: this.#ms });
   }
 
-  verifyAuthToken(token) {}
+  verifyAuthToken(token) {
+    return jwt.verify(token, this.#key);
+  }
 }
 
 module.exports = JWT;
