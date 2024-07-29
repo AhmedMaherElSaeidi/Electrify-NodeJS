@@ -54,6 +54,22 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.get("/user_carts/:id", async (req, res) => {
+  try {
+    const cart = await Cart.findAll({
+      where: { user_id: req.params.id },
+      order: [["createdAt", "DESC"]],
+      ...query,
+    });
+
+    cart
+      ? res.status(201).json({ data: cart })
+      : res.status(404).json({ message: "Cart with given ID wasn't found" });
+  } catch (error) {
+    res.status(400).json({ message: error });
+  }
+});
+
 router.post("/", async (req, res) => {
   try {
     let cart = req.body;

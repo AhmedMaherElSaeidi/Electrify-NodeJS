@@ -1,12 +1,13 @@
-const { authorized, authorizedAdmin } = require("../middlewares/authorization");
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
+const path = require("path");
 const { Op } = require("sequelize");
-const { User } = require("../models/index");
 const JWT = require("../services/JWT");
-const Password = require("../services/Password");
 const File = require("../services/File");
+const { User } = require("../models/index");
+const Password = require("../services/Password");
+const { authorized, authorizedAdmin } = require("../middlewares/authorization");
 
 // Table schema (for validating post, and put request)
 const schema = {
@@ -30,7 +31,7 @@ const upload = File.uploadFile();
 const defaultUserProfile = (gender) => {
   return gender === "M"
     ? "default-male-avatar-profile.jpg"
-    : "default-female-avatar-profiler.jpg";
+    : "default-female-avatar-profile.jpg";
 };
 
 // CRUD operations
@@ -39,7 +40,7 @@ router.get("/", authorized, authorizedAdmin, async (req, res) => {
   res.status(201).json({ data: users });
 });
 
-router.get("/:id", authorized, authorizedAdmin, async (req, res) => {
+router.get("/:id", authorized, async (req, res) => {
   try {
     const user = await User.findOne({
       where: { id: req.params.id },
@@ -77,7 +78,6 @@ router.post("/", upload.single("image"), async (req, res) => {
     user = await User.create(user);
     const jwt = new JWT();
 
-    res.header("x-auth-token", jwt.getAuthToken(user));
     res.status(201).json({ data: user });
   } catch (error) {
     res.status(400).json({ message: error });
@@ -99,7 +99,7 @@ router.put("/:id", authorized, upload.single("image"), async (req, res) => {
         return res.status(400).json({ message: error.details[0].message });
 
       // Validating for existing username
-      const _existing_username = await await User.findOne({
+      const existing_username = await await User.findOne({
         where: {
           username: user.username,
           id: {
@@ -107,16 +107,29 @@ router.put("/:id", authorized, upload.single("image"), async (req, res) => {
           },
         },
       });
-      if (_existing_username)
+      if (existing_username)
         return res.status(400).json({ message: "Username already exists.!" });
 
-      // Set user attributes
-      user.image = req.file
-        ? req.file.filename
-        : defaultUserProfile(user.gender);
-      user.password = user.password
-        ? await Password.hashPassword(user.password)
-        : delete user.password;
+      // Set user profile
+      user.image = req.file ? req.file.filename : oldUser.image;
+      if (
+        req.file &&
+        oldUser.image &&
+        !oldUser.image.includes("avatar-profile.jpg")
+      ) {
+        const oldImagePath = path.join(__dirname, "../public", oldUser.image);
+        const deleted = await File.deleteFile(oldImagePath);
+        if (!deleted) {
+          return res
+            .status(400)
+            .json({ message: "Error encountered while removing old image." });
+        }
+      }
+
+      // Set user password
+      if ("password" in user) {
+        user.password = await Password.hashPassword(user.password);
+      }
 
       // Updating user
       if (oldUser.user === user.username) delete user.username;
@@ -125,6 +138,7 @@ router.put("/:id", authorized, upload.single("image"), async (req, res) => {
           id: req.params.id,
         },
       });
+
       return res.status(201).json({ message: "Updated successfully." });
     }
 
@@ -134,15 +148,15 @@ router.put("/:id", authorized, upload.single("image"), async (req, res) => {
   }
 });
 
-router.delete("/:id", authorized, authorizedAdmin, async (req, res) => {
+router.delete("/:id", authorized, async (req, res) => {
   try {
     const user = await User.findOne({
       where: { id: req.params.id },
     });
 
     if (user) {
-      // Removing product image
-      if (!user.image.includes("avatar-profiler.jpg")) {
+      // Removing user image
+      if (!user.image.includes("avatar-profile.jpg")) {
         const deleted = await File.deleteFile(`../public/${user.image}`);
         if (!deleted)
           return res

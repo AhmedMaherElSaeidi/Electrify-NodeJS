@@ -78,45 +78,39 @@ router.post(
   }
 );
 
-router.put(
-  "/:id",
-  authorized,
-  authorizedAdmin,
-  upload.single("image"),
-  async (req, res) => {
-    try {
-      let product = await Product.findOne({
-        where: { id: req.params.id },
+router.put("/:id", authorized, upload.single("image"), async (req, res) => {
+  try {
+    let product = await Product.findOne({
+      where: { id: req.params.id },
+    });
+
+    if (product) {
+      let product = req.body;
+
+      // Validate data
+      const { error } = schema.validate(product);
+      if (error)
+        return res.status(400).json({ message: error.details[0].message });
+
+      // Set product image
+      product.image = req.file
+        ? req.file.filename
+        : "default-product-image.jpg";
+
+      // Updating product
+      await Product.update(product, {
+        where: {
+          id: req.params.id,
+        },
       });
-
-      if (product) {
-        let product = req.body;
-
-        // Validate data
-        const { error } = schema.validate(product);
-        if (error)
-          return res.status(400).json({ message: error.details[0].message });
-
-        // Set product image
-        product.image = req.file
-          ? req.file.filename
-          : "default-product-image.jpg";
-
-        // Updating product
-        await Product.update(product, {
-          where: {
-            id: req.params.id,
-          },
-        });
-        return res.status(201).json({ message: "Updated successfully." });
-      }
-
-      res.status(404).json({ message: "Product with given ID wasn't found" });
-    } catch (error) {
-      res.status(400).json({ message: error });
+      return res.status(201).json({ message: "Updated successfully." });
     }
+
+    res.status(404).json({ message: "Product with given ID wasn't found" });
+  } catch (error) {
+    res.status(400).json({ message: error });
   }
-);
+});
 
 router.delete("/:id", authorized, authorizedAdmin, async (req, res) => {
   try {
