@@ -157,11 +157,13 @@ router.delete("/:id", authorized, async (req, res) => {
     if (user) {
       // Removing user image
       if (!user.image.includes("avatar-profile.jpg")) {
-        const deleted = await File.deleteFile(`../public/${user.image}`);
-        if (!deleted)
+        const imagePath = path.join(__dirname, "../public", user.image);
+        const deleted = await File.deleteFile(imagePath);
+        if (!deleted) {
           return res
             .status(400)
-            .json({ message: "Error encountered while removing image." });
+            .json({ message: "Error encountered while removing old image." });
+        }
       }
 
       // Removing user
