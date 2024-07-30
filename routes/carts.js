@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
-const { Cart, CatItem, Product } = require("../models/index");
+const { Cart, CatItem, Product, User } = require("../models/index");
 
 // Table schema (for validating post, and put request)
 const schema = Joi.object({
@@ -27,6 +27,13 @@ const query = {
         },
       ],
     },
+    {
+      model: User,
+      as: "user_cart",
+      attributes: {
+        exclude: ["password", "createdAt", "updatedAt"],
+      },
+    },
   ],
   attributes: {
     exclude: ["updatedAt"],
@@ -35,7 +42,9 @@ const query = {
 
 // CRUD operations
 router.get("/", async (req, res) => {
-  const carts = await Cart.findAll(query);
+  const carts = await Cart.findAll({
+    ...query,
+  });
   res.status(201).json({ data: carts });
 });
 

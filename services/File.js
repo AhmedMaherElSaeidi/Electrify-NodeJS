@@ -23,6 +23,10 @@ class File {
       await fs.unlink(filePath);
       return true;
     } catch (err) {
+      if (err.code === "ENOENT") {
+        // File does not exist, no need to delete
+        return true;
+      }
       return false;
     }
   }
