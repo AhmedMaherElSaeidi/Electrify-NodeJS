@@ -65,8 +65,8 @@ You can find the frontend implementation [here](https://github.com/AhmedMaherElS
 
 1. **Clone the repository**:
     ```bash
-    git clone https://github.com/yourusername/ecommerce-app.git
-    cd ecommerce-app/backend
+    git clone https://github.com/AhmedMaherElSaeidi/Electrify-NodeJS.git
+    cd Electrify-NodeJS
     ```
 
 2. **Install dependencies**:
