@@ -47,6 +47,23 @@ router.get("/:id", async (req, res) => {
   }
 });
 
+router.get("/:cartID/:productID", async (req, res) => {
+  try {
+    const cartItem = await CatItem.findOne({
+      where: { cart_id: req.params.cartID, product_id: req.params.productID },
+      ...query,
+    });
+
+    cartItem
+      ? res.status(201).json({ data: cartItem })
+      : res
+          .status(404)
+          .json({ message: "cartItem with given IDs wasn't found" });
+  } catch (error) {
+    res.status(400).json({ message: error });
+  }
+});
+
 router.post("/", async (req, res) => {
   try {
     let cartItem = req.body;
