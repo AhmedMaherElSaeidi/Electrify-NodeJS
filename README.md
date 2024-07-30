@@ -4,6 +4,8 @@
 
 This is the backend for the e-commerce application. It provides RESTful APIs to manage users, products, carts, and orders. The backend is built with Node.js, Express, and Sequelize, and uses JWT for authentication and Multer for handling file uploads.
 
+You can find frontend implementation [here](https://github.com/AhmedMaherElSaeidi/Electrify-ReactJS).
+
 ## Tech Stack
 
 - **Node.js**: JavaScript runtime for server-side applications.
