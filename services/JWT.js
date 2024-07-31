@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken");
+const config = require("../config/config");
 
 class JWT {
-  #key = "5BD24DCB1483578373DD86A7AD35F";
+  #key = config.JWT_KEY;
   #ms = "3600s";
 
   getAuthToken(user) {

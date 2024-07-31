@@ -93,9 +93,11 @@ You can find the frontend implementation [here](https://github.com/AhmedMaherElS
 Ensure you have the following variables set in your `.env` file:
 
 ```plaintext
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=yourpassword
-DB_NAME=ecommerce
-JWT_SECRET=your_jwt_secret
-PORT=5000
+HOST="localhost"
+PORT=3600
+DB_NAME="electrifydb"
+DB_DIALECT= "mysql"
+DB_USERNAME="root"
+DB_PASSWORD=""
+DB_PORT=3306
+JWT_KEY="5BD24DCB1483578373DD86A7AD35F"

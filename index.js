@@ -1,7 +1,8 @@
 const { authorized } = require("./middlewares/authorization");
 const bodyParser = require("body-parser");
-const cors = require("cors");
+const config = require("./config/config");
 const morgan = require("morgan");
+const cors = require("cors");
 const express = require("express");
 const app = express();
 
@@ -30,7 +31,7 @@ app.use("/api/cartItems", authorized, cartItems_routes);
 app.use("/api/categories", categories_routes);
 
 // Server listening
-const PORT = process.env.PORT || 3600;
+const PORT = config.PORT;
 app.listen(PORT, () => {
   console.log("====================================");
   console.log(`Server is listening... PORT:${PORT}`);

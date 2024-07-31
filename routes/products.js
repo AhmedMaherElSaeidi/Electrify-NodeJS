@@ -102,9 +102,6 @@ router.put("/:id", authorized, upload.single("image"), async (req, res) => {
         const imagePath = path.join(__dirname, "../public", oldProduct.image);
         const deleted = await File.deleteFile(imagePath);
         if (!deleted) {
-          console.log('====================================');
-          console.log("IM HERE");
-          console.log('====================================');
           return res
             .status(400)
             .json({ message: "Error encountered while removing image." });
