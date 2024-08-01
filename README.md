@@ -3,8 +3,7 @@
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [Tech Stack](#tech-stack)
-3. [Features](#features)
+2. [Features](#features)
    - [User Management](#user-management)
    - [Product Management](#product-management)
    - [Cart Management](#cart-management)
@@ -12,17 +11,17 @@
    - [File Handling](#file-handling)
    - [Validation and Security](#validation-and-security)
    - [Development Tools](#development-tools)
-4. [APIs](#apis)
+3. [APIs](#apis)
    - [Auth](#auth)
    - [Categories](#categories)
    - [Carts](#carts)
    - [Cart Items](#cart-items)
    - [Products](#products)
    - [Users](#users)
-5. [Getting Started](#getting-started)
+4. [Getting Started](#getting-started)
    - [Prerequisites](#prerequisites)
    - [Setup](#setup)
-6. [Environment Variables](#environment-variables)
+5. [Environment Variables](#environment-variables)
 
 
 ## Overview
@@ -30,17 +29,6 @@
 This is the backend for the e-commerce application. It provides RESTful APIs to manage users, products, carts, and orders. The backend is built with Node.js, Express, and Sequelize, and uses JWT for authentication and Multer for handling file uploads.
 
 You can find the frontend implementation [here](https://github.com/AhmedMaherElSaeidi/Electrify-ReactJS).
-
-## Tech Stack
-
-- **Node.js**: JavaScript runtime for server-side applications.
-- **Express**: Web framework for building APIs.
-- **Sequelize**: ORM for relational databases.
-- **JWT**: JSON Web Tokens for authentication.
-- **Multer**: Middleware for handling file uploads.
-- **Joi**: Data validation library.
-- **bcrypt**: Library for hashing passwords.
-- **Nodemon**: Tool for automatically restarting the server during development.
 
 ## Features
 
